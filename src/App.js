@@ -51,14 +51,63 @@ export default class App extends React.Component {
       return this.renderWhileLoading();
     }
 
+    const adaptedPulse = adaptPulse(pulseData);
+    const adaptedUrad = adaptUrad(uradData);
+
+    const outsideUrad =
+      _.orderBy(
+        adaptedUrad
+          .map(x => {
+            return {
+              sensorId: x.id,
+              numberOfOutbreaks: _.size(x.data.filter(x => x.y > 50))
+            }
+          })
+          .filter(x => x.numberOfOutbreaks > 1),
+        'numberOfOutbreaks',
+        'desc'
+      );
+
+    const outsidePulse =
+      _.orderBy(
+        adaptedPulse
+          .map(x => {
+            return {
+              sensorId: x.id,
+              numberOfOutbreaks: _.size(x.data.filter(x => x.y > 50))
+            }
+          })
+          .filter(x => x.numberOfOutbreaks > 1),
+        'numberOfOutbreaks',
+        'desc'
+      );
+
     return (
       <div>
         <div className="map_screen">
           <Map data={adapters.toMapFormat(uradData)} />
         </div>
         <div className="container">
-          <LineGraph data={adaptPulse(pulseData)} outsideData={getOutsideDataPulse(pulseData)} />
-          <LineGraph data={adaptUrad(uradData)} outsideData={[]} />
+          <LineGraph data={adaptedPulse} outsideData={getOutsideDataPulse(pulseData)} />
+          Pulse
+          <hr className="separator" />
+          <LineGraph data={adaptedUrad} />
+          Urad
+          <hr className="separator" />
+        </div>
+        <div className="outbreakContainer">
+          <div>
+            <h3>Urad</h3>
+            <div>
+              {outsideUrad.map(x => <div>{x.sensorId}, {x.numberOfOutbreaks}</div>)}
+            </div>
+          </div>
+          <div>
+            <h3>Pulse</h3>
+            <div>
+              {outsidePulse.map(x => <div>{x.sensorId}, {x.numberOfOutbreaks}</div>)}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -115,11 +164,9 @@ function adaptUrad(data) {
   const groupedBySensorIds = _.groupBy(data, item => item.sensorId);
   _.forEach(groupedBySensorIds, (sensorValue, sensorKey) => {
 
-    const filteredData = sensorValue.filter(item => item.pm10 > 0);
-
     var obj = {
       id: sensorKey,
-      data: filteredData.map(item => {
+      data: sensorValue.map(item => {
         return {
           x: moment(item.stamp * 1000).format("YYYY-MM-DD"),
           y: item.pm10,

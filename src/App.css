@@ -7,6 +7,21 @@
   margin-top: 50px;
 }
 
+.outbreakContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  justify-content: space-evenly;
+  margin-bottom: 50px;
+}
+
+.separator{ 
+  width: 90vw;
+  padding: 0.5px;
+  margin: 50px;
+  background-color:saddlebrown
+}
+
 .map_screen {
   display: flex;
   height: 100vh;
