@@ -8,6 +8,9 @@ import moment from 'moment';
 
 import './App.css';
 import LineGraph from './components/LineGraph'
+import Map from './components/Map'
+
+import * as adapters from './adapters';
 
 export default class App extends React.Component {
   state = {
@@ -50,6 +53,9 @@ export default class App extends React.Component {
 
     return (
       <div>
+        <div className="map_screen">
+          <Map data={adapters.toMapFormat(uradData)} />
+        </div>
         <div className="container">
           <LineGraph data={adaptPulse(pulseData)} outsideData={getOutsideDataPulse(pulseData)} />
           <LineGraph data={adaptUrad(uradData)} outsideData={[]} />

@@ -11,7 +11,12 @@
     "moment": "^2.24.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0"
+    "react-scripts": "3.3.0",
+    "react-leaflet": "^2.3.0",
+    "react-leaflet-choropleth": "^2.0.0",
+    "react-leaflet-markercluster": "^2.0.0-rc3",
+    "leaflet": "^1.5.1",
+    "leaflet.markercluster": "^1.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
