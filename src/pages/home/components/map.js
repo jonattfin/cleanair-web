@@ -5,17 +5,11 @@ import L from 'leaflet'
 import { IconNames } from "@blueprintjs/icons";
 import { Colors } from "@blueprintjs/core";
 
-// import { Line } from './';
-import * as adapters from '../adapters';
-import { getLimits } from '../limits';
-
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.css';
 
-const center = [46.770439, 23.591423];
-
 export default (props) => (
-  <LeafletMap style={{ height: '100vh', width: '100vw' }} center={center} zoom={13} maxZoom={16} minZoom={7}>
+  <LeafletMap style={{ height: '100vh', width: '100vw' }} center={props.center} zoom={13} maxZoom={18} minZoom={7}>
     <TileLayer
       attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -25,10 +19,10 @@ export default (props) => (
         <Marker
           key={index}
           position={item.position}
-          icon={getIcon(item)}>
+          icon={getIcon(item.color)}>
           <Popup maxWidth="480px">
             <div style={{ height: "100px", minWidth: "100px" }}>
-              {item.pm10}
+              {item.value}
             </div>
           </Popup>
         </Marker>
@@ -37,12 +31,7 @@ export default (props) => (
   </LeafletMap>
 )
 
-function getData(originalData, sensorId) {
-  const type = 'pm10';
-  return adapters.toLineFormat(originalData.filter(item => item.sensorId === sensorId), type, `${type} µg/m3`)
-}
-
-function getIcon(item) {
+function getIcon(color) {
 
   const markerHtmlStyles = (color, bgColor) => `
     background-color: ${color};
@@ -57,7 +46,7 @@ function getIcon(item) {
 
   const html = `
     <div/>
-      <span style="${markerHtmlStyles(getColor(item, 'pm10'), Colors.GOLD5)}"/>
+      <span style="${markerHtmlStyles(color, Colors.GOLD5)}"/>
     </div>
   `;
 
@@ -66,21 +55,5 @@ function getIcon(item) {
     iconAnchor: [0, 24],
     html: html,
   })
-}
-
-function getColor(item, type) {
-  const limits = getLimits(type);
-
-  for (let i = 0; i < limits.length; i++) {
-    const element = limits[i];
-    const nextElementValue = limits[i + 1] ? limits[i + 1].val : Number.POSITIVE_INFINITY;
-
-    const itemValue = item[type];
-    if (element.val <= itemValue && itemValue < nextElementValue) {
-      return element.color;
-    }
-  }
-
-  return Colors.GREEN5;
 }
 

@@ -1,0 +1,46 @@
+[
+    {
+        "sensorId": "1",
+        "time": "1580568504",
+        "position": {
+            "latitude": 46.770439,
+            "longitude": 23.591423
+        },
+        "values": [
+            {
+                "type": "pm10",
+                "value": 1
+            },
+            {
+                "type": "pm25",
+                "value": 1
+            },
+            {
+                "type": "temperature",
+                "value": 13
+            }
+        ]
+    },
+    {
+        "sensorId": "1",
+        "time": "1580568504",
+        "position": {
+            "latitude": 46.770439,
+            "longitude": 23.591423
+        },
+        "values": [
+            {
+                "type": "pm10",
+                "value": 1
+            },
+            {
+                "type": "pm25",
+                "value": 1
+            },
+            {
+                "type": "temperature",
+                "value": 13
+            }
+        ]
+    }
+]

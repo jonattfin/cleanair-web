@@ -2,16 +2,16 @@ import React from 'react'
 import { Line } from '@nivo/line';
 
 const commonProperties = {
-  height: 1080 / 2,
+  height: 1080,
   width: 1920,
-  margin: { left: 50, bottom: 50 },
+  margin: { left: 50, bottom: 50, top: 50 },
   animate: true,
   enableSlices: 'x',
 }
 
 export default class LineGraph extends React.Component {
   render() {
-    const { data } = this.props;
+    const { data } = this.props
 
     return (
       <div>
@@ -54,6 +54,6 @@ export default class LineGraph extends React.Component {
           ]}
         />
       </div>
-    );
+    )
   }
 }
