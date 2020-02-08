@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Intent, Spinner, Colors } from "@blueprintjs/core"
 import _ from 'lodash'
 import moment from 'moment'
@@ -6,44 +6,47 @@ import moment from 'moment'
 import { Map, LineGraph } from './components'
 import api from '../../api'
 import { getLimits } from './limits'
+import * as constants from '../../constants'
 
 import styles from './home.module.css'
 
-export default class IndexComponent extends React.Component {
-  state = {
-    isLoading: false,
-    measurementType: '',
-    mapData: []
-  }
 
-  componentDidMount = async () => {
-    this.setState({
-      isLoading: true
-    })
+export default (props) => {
+  const [isLoading, setIsLoading] = useState(0);
+  const [data, setData] = useState(1);
 
-    const data = await api.getYearAvg('', 2019)
+  const { year = 2020 } = props;
+  console.log(`year is ${year}`);
 
-    this.setState({
-      isLoading: false,
-      mapData: data.measures,
-      measurementType: 'pm25'
-    })
-  }
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const currentData = await api.getYearAvg(year)
 
-  render() {
-    const { isLoading } = this.state;
-
-    if (isLoading) {
-      return getLoadingScreen()
+      setIsLoading(false);
+      setData(currentData);
     }
+    fetchData();
+  }, []);
 
-    return (
-      <div className={styles.topContainer}>
-        <Map {...getMapData(this.state)} />
-        <LineGraph {...getLineGraphData(this.state)} />
-      </div>
-    )
+  if (isLoading) {
+    return getLoadingScreen()
   }
+
+  return (
+    <div className={styles.topContainer}>
+      <Map {...getMapData(data)} />
+      <div className={styles.separator}>
+        {JSON.stringify(getOutsideData(data))}
+      </div>
+      {constants.measurementTypes.map(type => (
+        <div key={type}>
+          <LineGraph  {...getLineGraphData(data, type)} type={type} />
+          <center>{type}</center>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function getLoadingScreen() {
@@ -55,35 +58,27 @@ function getLoadingScreen() {
   )
 }
 
-function getLineGraphData(state) {
-  const { mapData, measurementType } = state
-
+function getLineGraphData(data, measurementType) {
   const result = [];
 
-  const sentinel = {
-    id: 1,
-    data: [{
-      x: moment("2019-01-01").format("YYYY-MM-DD"),
-      y: 1
-    }]
-  };
-
-  result.push(sentinel);
-
-  const groupedBySensorIds = _.groupBy(mapData, item => item.sensorId);
+  const groupedBySensorIds = _.groupBy(data, item => item.sensorId);
   _.forEach(groupedBySensorIds, (sensorValue, sensorKey) => {
 
-    var obj = {
-      id: sensorKey,
-      data: sensorValue.map(item => {
-        return {
-          x: moment(item.stamp * 1000).format("YYYY-MM-DD"),
-          y: item[measurementType],
+    const rr = [];
+    sensorValue.forEach(item => {
+      if (item.obj) {
+        const currentItem = item.obj[measurementType];
+        if (currentItem) {
+          rr.push({
+            x: moment(currentItem.stamp * 1000).format("YYYY-MM-DD"),
+            y: currentItem.value,
+            source: currentItem.source
+          });
         }
-      }),
-    }
+      }
 
-    result.push(obj);
+    });
+    result.push({ id: sensorKey, data: rr })
   });
 
   return {
@@ -91,23 +86,32 @@ function getLineGraphData(state) {
   }
 }
 
-function getMapData(state) {
-  const { mapData, measurementType } = state
+function getMapData(data) {
+  const measurementType = 'pm25';
 
-  const result = []
+  const result = [];
 
-  mapData.forEach(item => {
-    item.top.forEach((topItem) => {
-      const { latitude, longitude } = topItem;
-      const value = topItem[measurementType];
+  const groupedBySensorIds = _.groupBy(data, item => item.sensorId);
+  _.forEach(groupedBySensorIds, (sensorValue, sensorKey) => {
 
-      result.push({
-        position: [latitude, longitude],
-        value,
-        color: getColor(topItem, measurementType),
-      })
-    })
-  })
+    sensorValue.forEach(item => {
+      if (item.obj) {
+        const currentItem = item.obj[measurementType];
+        if (currentItem) {
+          currentItem.top.forEach((it) => {
+            const { latitude, longitude } = it;
+            const value = it[measurementType];
+
+            result.push({
+              position: [latitude, longitude],
+              value,
+              color: getColor(it, measurementType),
+            })
+          })
+        }
+      }
+    });
+  });
 
   return {
     data: result,
@@ -115,6 +119,35 @@ function getMapData(state) {
   }
 }
 
+function getOutsideData(data) {
+  const measurementType = 'pm25';
+
+  const result = {};
+
+  const groupedBySensorIds = _.groupBy(data, item => item.sensorId);
+  _.forEach(groupedBySensorIds, (sensorValue, sensorKey) => {
+    result[sensorKey] = 0;
+    sensorValue.forEach(item => {
+      if (item.obj) {
+        const currentItem = item.obj[measurementType];
+        if (currentItem) {
+          if (currentItem.value > 25) {
+            result[sensorKey] += 1;
+          }
+        }
+      }
+    });
+  });
+
+  const array = Object.keys(result).map(function (key) {
+    const value = result[key];
+    return { sensorId: key, count: value };
+  });
+
+  return {
+    data: _.orderBy(array, 'count', 'desc'),
+  }
+}
 
 function getColor(item, type) {
   const limits = getLimits(type);

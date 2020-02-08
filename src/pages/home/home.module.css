@@ -11,3 +11,9 @@
   align-items: center;
   height: 100vh;
 }
+
+.separator {
+  padding: 20px;
+  font-size: medium;
+  font-weight: bold;
+}

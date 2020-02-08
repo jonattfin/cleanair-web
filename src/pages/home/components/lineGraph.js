@@ -2,7 +2,7 @@ import React from 'react'
 import { Line } from '@nivo/line';
 
 const commonProperties = {
-  height: 1080,
+  height: 1080 / 2,
   width: 1920,
   margin: { left: 50, bottom: 50, top: 50 },
   animate: true,
@@ -11,7 +11,18 @@ const commonProperties = {
 
 export default class LineGraph extends React.Component {
   render() {
-    const { data } = this.props
+    const { data, type } = this.props
+
+    let markers = [];
+    if (type === 'pm25') {
+      markers = [{
+        axis: 'y',
+        value: 25,
+        lineStyle: { stroke: '#FF1493', strokeWidth: 3 },
+        legend: 'y marker',
+        legendOrientation: 'vertical',
+      }];
+    }
 
     return (
       <div>
@@ -43,15 +54,7 @@ export default class LineGraph extends React.Component {
             modifiers: [['darker', 0.3]],
           }}
           useMesh={true}
-          markers={[
-            {
-              axis: 'y',
-              value: 50,
-              lineStyle: { stroke: '#FF1493', strokeWidth: 3 },
-              legend: 'y marker',
-              legendOrientation: 'vertical',
-            },
-          ]}
+          markers={markers}
         />
       </div>
     )

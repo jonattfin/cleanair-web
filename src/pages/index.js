@@ -5,15 +5,21 @@ import {
   Switch,
 } from 'react-router-dom'
 
-
-const Home = lazy(() => import('./home'));
+import Home from './home'
+import { Header } from '../components'
+import * as constants from '../constants'
 
 export default (props) => (
   <Router>
     <div>
+      <Header {...props} />
       <Suspense fallback={<div>Loading...</div>}>
         <Switch>
-          <Route exact path="/" component={Home} />
+          {constants.years.map(year => (
+            <Route key={year} exact path={`/${year}`}>
+              <Home year={year} />
+            </Route>
+          ))}
         </Switch>
       </Suspense>
     </div>
