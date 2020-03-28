@@ -7,7 +7,36 @@ const commonProperties = {
   margin: { left: 50, bottom: 50, top: 50 },
   animate: true,
   enableSlices: 'x',
+};
+
+const linearProps = {
+  yScale: {
+    type: 'linear',
+  }
 }
+
+const logarithmicProps = {
+  gridYValues: [50, 100, 200, 300, 1000],
+  xScale: {
+    type: 'log',
+    base: 2,
+    max: 'auto',
+  },
+  // axisBottom: {
+  //   legend: 'logarithmic scale (base: 2)',
+  //   legendOffset: -12,
+  // },
+  yScale: {
+    type: 'log',
+    base: 10,
+    max: 'auto',
+  },
+  // axisLeft: {
+  //   tickValues: [10, 100, 1000, 10000, 100000, 1000000, 10000000],
+  //   legend: 'logarithmic scale (base: 10)',
+  //   legendOffset: 12,
+  // },
+};
 
 export default class LineGraph extends React.Component {
   render() {
@@ -28,6 +57,7 @@ export default class LineGraph extends React.Component {
       <div>
         <Line
           {...commonProperties}
+          {...linearProps}
           data={data}
           xScale={{
             type: 'time',
@@ -35,9 +65,6 @@ export default class LineGraph extends React.Component {
             precision: 'day',
           }}
           xFormat="time:%Y-%m-%d"
-          yScale={{
-            type: 'linear',
-          }}
           axisLeft={{
             legend: 'linear scale',
             legendOffset: 12,

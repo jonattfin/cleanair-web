@@ -12,8 +12,8 @@ import styles from './home.module.css'
 
 
 export default (props) => {
-  const [isLoading, setIsLoading] = useState(0);
-  const [data, setData] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState([]);
 
   const { year = 2020 } = props;
   console.log(`year is ${year}`);
@@ -33,15 +33,17 @@ export default (props) => {
     return getLoadingScreen()
   }
 
+  const filteredData = data; //.filter(d => d.sensorId === '82000153');
+
   return (
     <div className={styles.topContainer}>
-      <Map {...getMapData(data)} />
+      <Map {...getMapData(filteredData)} />
       <div className={styles.separator}>
-        {JSON.stringify(getOutsideData(data))}
+        {JSON.stringify(getOutsideData(filteredData))}
       </div>
       {constants.measurementTypes.map(type => (
         <div key={type}>
-          <LineGraph  {...getLineGraphData(data, type)} type={type} />
+          <LineGraph  {...getLineGraphData(filteredData, type)} type={type} />
           <center>{type}</center>
         </div>
       ))}
@@ -121,17 +123,19 @@ function getMapData(data) {
 
 function getOutsideData(data) {
   const measurementType = 'pm25';
-
   const result = {};
 
   const groupedBySensorIds = _.groupBy(data, item => item.sensorId);
   _.forEach(groupedBySensorIds, (sensorValue, sensorKey) => {
     result[sensorKey] = 0;
+    console.log(JSON.stringify(sensorValue));
     sensorValue.forEach(item => {
       if (item.obj) {
         const currentItem = item.obj[measurementType];
         if (currentItem) {
-          if (currentItem.value > 25) {
+          const { value, stamp } = currentItem;
+          console.log(`sensorKey ${sensorKey} value ${value}, stamp ${stamp}`);
+          if (parseInt(value, 10) > 25) {
             result[sensorKey] += 1;
           }
         }
@@ -139,6 +143,7 @@ function getOutsideData(data) {
     });
   });
 
+  debugger;
   const array = Object.keys(result).map(function (key) {
     const value = result[key];
     return { sensorId: key, count: value };

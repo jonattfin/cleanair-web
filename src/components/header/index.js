@@ -30,7 +30,7 @@ function createMenu() {
     <Route render={({ history }) => (
       <Menu>
         {constants.years.map(year => (
-          <MenuItem icon={'home'} text={year} onClick={onClick(history, `/${year}`)} />
+          <MenuItem key={`menuItem${year}`} icon={'home'} text={year} onClick={onClick(history, `/${year}`)} />
         ))}
       </Menu>
     )}>
